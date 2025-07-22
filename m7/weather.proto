@@ -1,0 +1,93 @@
+syntax = "proto3";
+
+package weather;
+
+// Сервис прогноза погоды
+service WeatherService {
+  // Получить текущую погоду по городу
+  rpc GetCurrentWeather (CityRequest) returns (WeatherResponse) {}
+  
+  // Получить прогноз погоды на несколько дней
+  rpc GetForecast (ForecastRequest) returns (ForecastResponse) {}
+  
+  // Подписаться на обновления погоды (стриминг с сервера)
+  rpc SubscribeToWeatherUpdates (CityRequest) returns (stream WeatherResponse) {}
+  
+  // Отправить данные с метеостанции (стриминг на сервер)
+  rpc SendWeatherData (stream WeatherData) returns (DataResponse) {}
+  
+  // Чат с метеорологом (двунаправленный стриминг)
+  rpc ChatWithMeteorologist (stream ChatMessage) returns (stream ChatMessage) {}
+}
+
+// Запрос погоды по городу
+message CityRequest {
+  string city = 1;
+  string country_code = 2; // Опциональный код страны (ISO 3166)
+}
+
+// Запрос прогноза погоды
+message ForecastRequest {
+  string city = 1;
+  string country_code = 2;
+  int32 days = 3; // Количество дней для прогноза (1-7)
+}
+
+// Ответ с текущей погодой
+message WeatherResponse {
+  string city = 1;
+  string country = 2;
+  double temperature = 3; // Температура в градусах Цельсия
+  double feels_like = 4; // Ощущаемая температура
+  double humidity = 5; // Влажность в процентах
+  double wind_speed = 6; // Скорость ветра в м/с
+  string condition = 7; // Текстовое описание погоды (ясно, облачно и т.д.)
+  int64 timestamp = 8; // Время измерения (Unix timestamp)
+}
+
+// Прогноз на один день
+message DailyForecast {
+  int64 date = 1; // Дата прогноза (Unix timestamp)
+  double temp_min = 2; // Минимальная температура
+  double temp_max = 3; // Максимальная температура
+  double humidity = 4; // Влажность
+  double wind_speed = 5; // Скорость ветра
+  string condition = 6; // Погодные условия
+  double precipitation_chance = 7; // Вероятность осадков (0-100%)
+}
+
+// Ответ с прогнозом погоды на несколько дней
+message ForecastResponse {
+  string city = 1;
+  string country = 2;
+  repeated DailyForecast daily = 3; // Прогноз по дням
+}
+
+// Данные с метеостанции
+message WeatherData {
+  string station_id = 1; // Идентификатор метеостанции
+  double latitude = 2; // Широта
+  double longitude = 3; // Долгота
+  double temperature = 4; // Температура
+  double humidity = 5; // Влажность
+  double pressure = 6; // Атмосферное давление (гПа)
+  double wind_speed = 7; // Скорость ветра
+  double wind_direction = 8; // Направление ветра (градусы)
+  double rainfall = 9; // Количество осадков (мм)
+  int64 timestamp = 10; // Время измерения
+}
+
+// Ответ на отправку данных
+message DataResponse {
+  bool success = 1; // Успешно ли обработаны данные
+  string message = 2; // Сообщение об успехе или ошибке
+  int32 records_processed = 3; // Количество обработанных записей
+}
+
+// Сообщение для чата с метеорологом
+message ChatMessage {
+  string user_id = 1; // Идентификатор пользователя или метеоролога
+  string message = 2; // Текст сообщения
+  int64 timestamp = 3; // Время отправки
+  bool is_meteorologist = 4; // true если сообщение от метеоролога
+}

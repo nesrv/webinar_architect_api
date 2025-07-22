@@ -20,17 +20,17 @@ pip install jsonrpcserver jsonrpcclient aiohttp
 Файл `server.py`:  
 ```python
 from aiohttp import web
-from jsonrpcserver import method, async_dispatch
+from jsonrpcserver import method, async_dispatch, Success
 
 # Регистрируем методы API
 @method
 async def add(a, b):
-    return a + b
+    return Success(a + b)
 
 @method
 async def get_user(user_id):
     users = {1: "Alice", 2: "Bob", 3: "Charlie"}
-    return {"id": user_id, "name": users.get(user_id, "Unknown")}
+    return Success({"id": user_id, "name": users.get(user_id, "Unknown")})
 
 # Обработчик JSON-RPC запросов
 async def handle_rpc(request):
@@ -97,6 +97,16 @@ asyncio.run(main())
 ```bash
 curl -X POST http://localhost:5000/rpc -d '{"jsonrpc": "2.0", "method": "add", "params": [5, 7], "id": 1}' -H "Content-Type: application/json"
 ```
+
+**URL-формат запроса (GET):**
+```
+http://localhost:5000/rpc?jsonrpc=2.0&method=add&params[]=5&params[]=7&id=1
+```
+
+**Примечание:** Для работы с GET-запросами необходимо модифицировать сервер, чтобы он обрабатывал не только POST, но и GET запросы. В исходной версии сервера поддерживаются только POST-запросы, поэтому при попытке открыть URL в браузере вы получите ошибку `405: Method Not Allowed`.
+
+
+
 **Ответ:**  
 ```json
 {"jsonrpc": "2.0", "result": 12, "id": 1}
@@ -104,7 +114,70 @@ curl -X POST http://localhost:5000/rpc -d '{"jsonrpc": "2.0", "method": "add", "
 
 ---
 
-## **5. Итог**  
+## **5. Улучшенный сервер с поддержкой GET-запросов**
+
+Файл `server_with_get.py`:
+```python
+from aiohttp import web
+import json
+from jsonrpcserver import method, async_dispatch, Success
+
+# Регистрируем методы API
+@method
+async def add(a, b):
+    return Success(a + b)
+
+@method
+async def get_user(user_id):
+    users = {1: "Alice", 2: "Bob", 3: "Charlie"}
+    return Success({"id": user_id, "name": users.get(user_id, "Unknown")})
+
+# Обработчик POST JSON-RPC запросов
+async def handle_post_rpc(request):
+    request_data = await request.text()
+    response = await async_dispatch(request_data)
+    return web.json_response(response)
+
+# Обработчик GET JSON-RPC запросов
+async def handle_get_rpc(request):
+    # Получаем параметры из URL
+    params = request.query
+    
+    # Формируем JSON-RPC запрос из параметров URL
+    jsonrpc_request = {
+        "jsonrpc": params.get("jsonrpc", "2.0"),
+        "method": params.get("method"),
+        "id": params.get("id", "1")
+    }
+    
+    # Обрабатываем параметры
+    if "params[]" in params:
+        # Если параметры переданы как params[]=value1&params[]=value2
+        jsonrpc_request["params"] = [
+            int(p) if p.isdigit() else p 
+            for p in request.query.getall("params[]")
+        ]
+    elif "params" in params:
+        # Если параметры переданы как строка JSON
+        try:
+            jsonrpc_request["params"] = json.loads(params["params"])
+        except:
+            jsonrpc_request["params"] = params["params"]
+    
+    # Выполняем запрос
+    response = await async_dispatch(json.dumps(jsonrpc_request))
+    return web.json_response(response)
+
+app = web.Application()
+# Регистрируем обработчики для POST и GET запросов
+app.router.add_post("/rpc", handle_post_rpc)
+app.router.add_get("/rpc", handle_get_rpc)
+
+if __name__ == "__main__":
+    web.run_app(app, port=5000)
+```
+
+## **6. Итог**  
 ✅ **Сервер:**  
 - Принимает JSON-RPC запросы.  
 - Реализует методы `add` и `get_user`.  
