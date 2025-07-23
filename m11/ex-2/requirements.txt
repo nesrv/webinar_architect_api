@@ -1,0 +1,4 @@
+pika==1.3.2
+colorama==0.4.6
+faker==19.13.0
+requests==2.31.0

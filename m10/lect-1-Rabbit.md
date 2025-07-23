@@ -5,7 +5,7 @@
 
 ---
 
-## **1. Архитектура с RabbitMQ (15 мин)**  
+## **1. Архитектура с RabbitMQ **  
 ### **1.1 Почему RabbitMQ вместо Kafka?**  
 | **Критерий**       | **Kafka**              | **RabbitMQ**          |  
 |--------------------|-----------------------|-----------------------|  
@@ -36,7 +36,7 @@ graph TD
 
 ---
 
-## **2. Практика: Внедрение RabbitMQ (35 мин)**  
+## **2. Практика: Внедрение RabbitMQ **  
 ### **2.1 Установка**  
 ```bash
 pip install fastapi uvicorn websockets redis pika sqlalchemy
@@ -115,7 +115,7 @@ channel.start_consuming()
 
 ---
 
-## **3. Профессиональные техники (10 мин)**  
+## **3. Профессиональные техники **  
 ### **3.1 Паттерны RabbitMQ**  
 - **Dead Letter Exchange (DLX):**  
   ```python
