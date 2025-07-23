@@ -13,6 +13,14 @@
 | **Очереди**        | Топики (partitions)   | Очереди + Exchange    |  
 | **Гибкость**       | Потоковая обработка   | Сложные маршрутизации (DLX, TTL) |  
 
+
+![alt text](image.png)
+
+![alt text](image-2.png)
+
+
+![alt text](image-1.png)
+
 ### **1.2 Схема интеграции**  
 ```mermaid
 graph TD

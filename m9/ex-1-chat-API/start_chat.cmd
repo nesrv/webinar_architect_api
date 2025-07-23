@@ -1,0 +1,3 @@
+@echo off
+echo Запуск чата с Redis...
+call run_with_redis.bat

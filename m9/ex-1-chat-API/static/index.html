@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Чат на WebSocket и Redis</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    #chat-container {
+      display: flex;
+      flex-direction: column;
+      height: 80vh;
+    }
+    #chat {
+      flex-grow: 1;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-bottom: 10px;
+      background-color: #f9f9f9;
+    }
+    #input-container {
+      display: flex;
+      margin-top: 10px;
+    }
+    #message {
+      flex-grow: 1;
+      padding: 8px;
+      margin-right: 10px;
+    }
+    button {
+      padding: 8px 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .system-message {
+      color: #888;
+      font-style: italic;
+    }
+    .user-message {
+      margin-bottom: 5px;
+    }
+    .user-id {
+      font-weight: bold;
+    }
+    .disconnected {
+      color: red;
+      font-weight: bold;
+    }
+    .connected {
+      color: green;
+      font-weight: bold;
+    }
+    .warning {
+      color: orange;
+      font-weight: bold;
+    }
+    .status-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Чат на WebSocket и Redis</h1>
+  
+  <div class="status-container">
+    <div id="connection-status" class="disconnected">Отключено</div>
+    <div id="redis-status"></div>
+  </div>
+  
+  <div id="user-form">
+    <input id="user-id" placeholder="Ваше имя" value="Гость">
+    <button onclick="connect()">Подключиться</button>
+  </div>
+  
+  <div id="chat-container" style="display: none;">
+    <div id="chat"></div>
+    <div id="input-container">
+      <input id="message" placeholder="Введите сообщение" onkeypress="handleKeyPress(event)">
+      <button onclick="sendMessage()">Отправить</button>
+    </div>
+  </div>
+
+  <script>
+    let ws = null;
+    let userId = "";
+    let redisAvailable = true;
+    let reconnectAttempts = 0;
+    const MAX_RECONNECT_ATTEMPTS = 3;
+    
+    function connect() {
+      userId = document.getElementById("user-id").value.trim();
+      if (!userId) {
+        userId = "Гость" + Math.floor(Math.random() * 1000);
+        document.getElementById("user-id").value = userId;
+      }
+      
+      // Сбрасываем счетчик попыток при новом подключении
+      reconnectAttempts = 0;
+      
+      // Создаем WebSocket соединение
+      ws = new WebSocket(`ws://${window.location.host}/ws/${userId}`);
+      
+      // Обработчик открытия соединения
+      ws.onopen = () => {
+        document.getElementById("connection-status").className = "connected";
+        document.getElementById("connection-status").textContent = "Подключено";
+        document.getElementById("user-form").style.display = "none";
+        document.getElementById("chat-container").style.display = "flex";
+        addMessage("Система", "Вы подключились к чату", true);
+      };
+      
+      // Обработчик получения сообщений
+      ws.onmessage = (event) => {
+        const message = event.data;
+        
+        // Проверяем сообщение о статусе Redis
+        if (message.includes("Redis недоступен")) {
+          redisAvailable = false;
+          document.getElementById("redis-status").className = "warning";
+          document.getElementById("redis-status").textContent = "Redis: недоступен";
+        }
+        
+        const parts = message.split(": ", 2);
+        
+        if (parts.length === 2) {
+          const senderId = parts[0];
+          const text = parts[1];
+          addMessage(senderId, text, senderId === "System");
+        } else {
+          addMessage("Система", message, true);
+        }
+      };
+      
+      // Обработчик ошибок
+      ws.onerror = (error) => {
+        console.error("WebSocket error:", error);
+        addMessage("Система", "Ошибка соединения", true);
+      };
+      
+      // Обработчик закрытия соединения
+      ws.onclose = (event) => {
+        document.getElementById("connection-status").className = "disconnected";
+        document.getElementById("connection-status").textContent = "Отключено";
+        
+        // Показываем форму входа только если превышено количество попыток
+        if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
+          document.getElementById("user-form").style.display = "block";
+          document.getElementById("chat-container").style.display = "none";
+        }
+        
+        addMessage("Система", "Соединение закрыто", true);
+      };
+    }
+    
+    function sendMessage() {
+      if (!ws || ws.readyState !== WebSocket.OPEN) {
+        addMessage("Система", "Нет соединения с сервером", true);
+        return;
+      }
+      
+      const messageInput = document.getElementById("message");
+      const message = messageInput.value.trim();
+      
+      if (message) {
+        ws.send(message);
+        messageInput.value = "";
+        messageInput.focus();
+      }
+    }
+    
+    function handleKeyPress(event) {
+      if (event.key === "Enter") {
+        sendMessage();
+      }
+    }
+    
+    function addMessage(senderId, text, isSystem = false) {
+      const chat = document.getElementById("chat");
+      const messageElement = document.createElement("div");
+      messageElement.className = isSystem ? "system-message" : "user-message";
+      
+      const userSpan = document.createElement("span");
+      userSpan.className = "user-id";
+      userSpan.textContent = senderId + ": ";
+      
+      messageElement.appendChild(userSpan);
+      messageElement.appendChild(document.createTextNode(text));
+      
+      chat.appendChild(messageElement);
+      chat.scrollTop = chat.scrollHeight;
+    }
+    
+    // Автоматическое переподключение при потере соединения
+    function setupReconnection() {
+      setInterval(() => {
+        if (ws === null || ws.readyState === WebSocket.CLOSED) {
+          if (userId && reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+            reconnectAttempts++;
+            console.log(`Попытка переподключения ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS}`);
+            connect();
+          }
+        }
+      }, 3000);
+    }
+    
+    setupReconnection();
+  </script>
+</body>
+</html>
