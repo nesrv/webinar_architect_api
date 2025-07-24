@@ -51,7 +51,11 @@ ping google.com
 
 ![alt text](image/osi-2.gif)
 
+
+![alt text](image/protocols.gif)
+
 ### **2.1 Как работает HTTP**
+
 
 - **Клиент** (браузер) отправляет **запрос** → **Сервер** возвращает **ответ**
 - Пример запроса:
@@ -59,6 +63,8 @@ ping google.com
   GET /index.html HTTP/1.1
   Host: example.com
   ```
+
+![alt text](image/protocols-2.gif)
 
 ### **2.2 Коды статусов HTTP**
 
