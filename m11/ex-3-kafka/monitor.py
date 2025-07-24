@@ -238,7 +238,7 @@ def main():
     try:
         while True:
             display_topic_stats()
-            time.sleep(1)  # Обновление каждую секунду
+            time.sleep(2)  # Обновление каждые 2 секунды
     except KeyboardInterrupt:
         print(f"\n{Fore.RED}[!] Мониторинг остановлен{Style.RESET_ALL}")
         SIMULATION_MODE = False  # Останавливаем поток имитации

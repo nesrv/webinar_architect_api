@@ -14,6 +14,7 @@
 
 ```bash
 pip install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
 
 ### 2. Запуск Kafka
@@ -21,7 +22,7 @@ pip install -r requirements.txt
 Запустите Kafka с помощью Docker Compose:
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 Это запустит:
@@ -31,21 +32,36 @@ docker-compose up -d
 
 ### 3. Запуск компонентов системы
 
-Запустите каждый компонент в отдельном терминале:
+#### Автоматический запуск всех компонентов:
 
-**Монитор топика:**
+**Windows:**
 ```bash
-python monitor.py
+start_all.bat
 ```
 
-**Обработчик заказов:**
+**Linux/macOS:**
 ```bash
-python consumer.py
+chmod +x *.sh
+./start_all.sh
 ```
 
-**Генератор заказов:**
+#### Ручной запуск каждого компонента:
+
+**Windows:**
+- Монитор: `start_monitor.bat`
+- Обработчик: `start_consumer.bat`
+- Генератор: `start_producer.bat`
+
+**Linux/macOS:**
+- Монитор: `./start_monitor.sh`
+- Обработчик: `./start_consumer.sh`
+- Генератор: `./start_producer.sh`
+
+**Или напрямую через Python:**
 ```bash
-python producer.py
+python monitor.py    # Монитор
+python consumer.py   # Обработчик
+python producer.py   # Генератор
 ```
 
 ## Как это работает

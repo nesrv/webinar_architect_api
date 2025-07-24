@@ -20,33 +20,43 @@ KAFKA_CONFIG = {
 # Счетчик обработанных заказов
 processed_orders = 0
 
+# Функция для генерации цвета по ID заказа
+def get_order_color(order_id):
+    colors = [Fore.RED, Fore.GREEN, Fore.YELLOW, Fore.BLUE, Fore.MAGENTA, Fore.CYAN]
+    return colors[order_id % len(colors)]
+
 # Функция обработки заказа
 def process_order(order):
     global processed_orders
     processed_orders += 1
     
+    order_color = get_order_color(order['order_id'])
+    
     # Вывод информации о полученном заказе
-    print(f"\n{Fore.BLUE}[↓] Получен заказ #{order['order_id']}{Style.RESET_ALL}")
-    print(f"   Клиент: {Fore.CYAN}{order['customer']['name']}{Style.RESET_ALL}")
-    print(f"   Статус: {Fore.YELLOW}{order['status']}{Style.RESET_ALL}")
+    print(f"\n{order_color}{'='*20} CONSUMER {'='*20}{Style.RESET_ALL}")
+    print(f"{order_color}[↓] ПОЛУЧЕН ЗАКАЗ #{order['order_id']}{Style.RESET_ALL}")
+    print(f"{order_color}Клиент: {order['customer']['name']}{Style.RESET_ALL}")
+    print(f"{order_color}Статус: {order['status']}{Style.RESET_ALL}")
+    print(f"{order_color}Итого: {order['total']} ₽{Style.RESET_ALL}")
     
     # Имитация обработки заказа с прогресс-баром
-    processing_time = random.uniform(1, 3)  # Случайное время обработки
-    print(f"   {Fore.WHITE}Обработка заказа: ", end="")
+    processing_time = random.uniform(2, 4)
+    print(f"{order_color}Обработка: ", end="")
     
-    steps = 20
+    steps = 15
     for i in range(steps + 1):
         progress = "█" * i + "░" * (steps - i)
         percent = i * 100 // steps
-        print(f"\r   {Fore.WHITE}Обработка заказа: {Fore.GREEN}{progress} {percent}%{Style.RESET_ALL}", end="")
+        print(f"\r{order_color}Обработка: {progress} {percent}%{Style.RESET_ALL}", end="")
         time.sleep(processing_time / steps)
     
-    print(f"\r   {Fore.GREEN}Обработка заказа: {'█' * steps} 100%{Style.RESET_ALL}")
+    print(f"\r{order_color}Обработка: {'█' * steps} 100%{Style.RESET_ALL}")
     
     # Вывод итоговой информации
-    print(f"   {Fore.GREEN}[✓] Заказ обработан успешно!{Style.RESET_ALL}")
-    print(f"   Всего обработано заказов: {Fore.MAGENTA}{processed_orders}{Style.RESET_ALL}")
-    print("-" * 50)
+    print(f"{order_color}[✓] ЗАКАЗ ОБРАБОТАН!{Style.RESET_ALL}")
+    print(f"{order_color}Всего: {processed_orders}{Style.RESET_ALL}")
+    print(f"{order_color}{'='*50}{Style.RESET_ALL}")
+    time.sleep(1)
 
 # Создание консьюмера Kafka
 consumer = Consumer(KAFKA_CONFIG)
@@ -69,7 +79,6 @@ try:
         
         if msg.error():
             if msg.error().code() == KafkaError._PARTITION_EOF:
-                # Конец партиции
                 print(f"{Fore.YELLOW}[!] Достигнут конец партиции{Style.RESET_ALL}")
             else:
                 print(f"{Fore.RED}[!] Ошибка: {msg.error()}{Style.RESET_ALL}")
@@ -88,5 +97,4 @@ try:
 except KeyboardInterrupt:
     print(f"\n{Fore.RED}[!] Обработчик заказов остановлен{Style.RESET_ALL}")
 finally:
-    # Закрываем консьюмер
     consumer.close()

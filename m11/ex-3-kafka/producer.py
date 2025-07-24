@@ -23,12 +23,15 @@ KAFKA_CONFIG = {
 # Создание продюсера Kafka
 producer = Producer(KAFKA_CONFIG)
 
+# Функция для генерации цвета по ID заказа
+def get_order_color(order_id):
+    colors = [Fore.RED, Fore.GREEN, Fore.YELLOW, Fore.BLUE, Fore.MAGENTA, Fore.CYAN]
+    return colors[order_id % len(colors)]
+
 # Функция для обработки результата отправки сообщения
 def delivery_report(err, msg):
     if err is not None:
         print(f"{Fore.RED}[!] Ошибка отправки сообщения: {err}{Style.RESET_ALL}")
-    else:
-        print(f"{Fore.GREEN}[✓] Сообщение отправлено в топик {msg.topic()} [{msg.partition()}] @ {msg.offset()}{Style.RESET_ALL}")
 
 # Список возможных товаров
 products = [
@@ -43,7 +46,7 @@ statuses = ["новый", "оплачен", "в обработке", "отпра
 # Функция для генерации случайного заказа
 def generate_order():
     order_id = random.randint(10000, 99999)
-    items_count = random.randint(1, 5)
+    items_count = random.randint(1, 3)
     items = random.sample(products, items_count)
     prices = [random.randint(500, 15000) for _ in range(items_count)]
     
@@ -59,7 +62,7 @@ def generate_order():
         "items": [{
             "name": items[i],
             "price": prices[i],
-            "quantity": random.randint(1, 3)
+            "quantity": random.randint(1, 2)
         } for i in range(items_count)],
         "total": sum(prices)
     }
@@ -77,19 +80,19 @@ def send_order(order):
         callback=delivery_report
     )
     
-    # Обрабатываем все ожидающие сообщения
-    producer.poll(0)
+    # Красивый вывод информации о заказе с уникальным цветом
+    order_color = get_order_color(order['order_id'])
+    print(f"\n{order_color}{'='*20} PRODUCER {'='*20}{Style.RESET_ALL}")
+    print(f"{order_color}[↑] ОТПРАВЛЕН ЗАКАЗ #{order['order_id']}{Style.RESET_ALL}")
+    print(f"{order_color}Клиент: {order['customer']['name']}{Style.RESET_ALL}")
+    print(f"{order_color}Статус: {order['status']}{Style.RESET_ALL}")
+    print(f"{order_color}Товары: {', '.join([item['name'] for item in order['items']])}{Style.RESET_ALL}")
+    print(f"{order_color}Итого: {order['total']} ₽{Style.RESET_ALL}")
+    print(f"{order_color}{'='*50}{Style.RESET_ALL}")
     
-    # Красивый вывод информации о заказе
-    print(f"{Fore.GREEN}[✓] Отправлен заказ #{order['order_id']}{Style.RESET_ALL}")
-    print(f"   Клиент: {Fore.CYAN}{order['customer']['name']}{Style.RESET_ALL}")
-    print(f"   Статус: {Fore.YELLOW}{order['status']}{Style.RESET_ALL}")
-    print(f"   Товары ({len(order['items'])}):")    
-    for item in order['items']:
-        print(f"     - {item['name']} x{item['quantity']} = {Fore.MAGENTA}{item['price'] * item['quantity']} ₽{Style.RESET_ALL}")
-    print(f"   {Fore.WHITE}Итого: {Fore.MAGENTA}{order['total']} ₽{Style.RESET_ALL}")
-    print(f"   Время: {order['created_at']}")
-    print("-" * 50)
+    # Принудительная отправка сообщения
+    producer.flush()
+    time.sleep(2)
 
 # Основной цикл генерации заказов
 try:
@@ -100,11 +103,10 @@ try:
     while True:
         order = generate_order()
         send_order(order)
-        # Случайная пауза между заказами (от 1 до 5 секунд)
-        delay = random.uniform(1, 5)
+        # Пауза между заказами (5-8 секунд для лучшей видимости)
+        delay = random.uniform(5, 8)
         time.sleep(delay)
         
 except KeyboardInterrupt:
     print(f"\n{Fore.RED}[!] Генератор заказов остановлен{Style.RESET_ALL}")
-    # Отправляем все оставшиеся сообщения перед завершением
     producer.flush()

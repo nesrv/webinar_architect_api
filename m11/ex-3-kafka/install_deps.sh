@@ -1,0 +1,4 @@
+#!/bin/bash
+echo "[*] Установка зависимостей для Kafka примера..."
+pip3 install confluent-kafka==2.3.0 colorama==0.4.6 faker==19.13.0 requests==2.31.0
+echo "[*] Установка завершена!"
