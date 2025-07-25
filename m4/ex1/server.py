@@ -4,7 +4,7 @@ from jsonrpcserver import method, async_dispatch
 # Регистрируем методы API
 @method
 async def add(a, b):
-    return a + b
+    return {"result": a + b}
 
 @method
 async def get_user(user_id):

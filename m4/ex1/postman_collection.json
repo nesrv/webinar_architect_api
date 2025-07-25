@@ -1,0 +1,136 @@
+{
+	"info": {
+		"name": "JSON-RPC API m4/ex1",
+		"description": "Коллекция для тестирования JSON-RPC API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "add - сложение чисел",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"add\",\n  \"params\": [2, 3],\n  \"id\": 1\n}"
+				},
+				"url": {
+					"raw": "http://localhost:5000/rpc",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "5000",
+					"path": ["rpc"]
+				}
+			}
+		},
+		{
+			"name": "get_user - получить пользователя",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"get_user\",\n  \"params\": [2],\n  \"id\": 2\n}"
+				},
+				"url": {
+					"raw": "http://localhost:5000/rpc",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "5000",
+					"path": ["rpc"]
+				}
+			}
+		},
+		{
+			"name": "add - GET запрос (server_with_get.py)",
+			"request": {
+				"method": "GET",
+				"url": {
+					"raw": "http://localhost:5000/rpc?method=add&params[]=5&params[]=7&id=3",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "5000",
+					"path": ["rpc"],
+					"query": [
+						{
+							"key": "method",
+							"value": "add"
+						},
+						{
+							"key": "params[]",
+							"value": "5"
+						},
+						{
+							"key": "params[]",
+							"value": "7"
+						},
+						{
+							"key": "id",
+							"value": "3"
+						}
+					]
+				}
+			}
+		},
+		{
+			"name": "get_user - GET запрос (server_with_get.py)",
+			"request": {
+				"method": "GET",
+				"url": {
+					"raw": "http://localhost:5000/rpc?method=get_user&params[]=1&id=4",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "5000",
+					"path": ["rpc"],
+					"query": [
+						{
+							"key": "method",
+							"value": "get_user"
+						},
+						{
+							"key": "params[]",
+							"value": "1"
+						},
+						{
+							"key": "id",
+							"value": "4"
+						}
+					]
+				}
+			}
+		},
+		{
+			"name": "Ошибка - несуществующий метод",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"nonexistent_method\",\n  \"params\": [],\n  \"id\": 5\n}"
+				},
+				"url": {
+					"raw": "http://localhost:5000/rpc",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "5000",
+					"path": ["rpc"]
+				}
+			}
+		}
+	]
+}
