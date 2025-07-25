@@ -96,6 +96,104 @@ result = client.service.CreateUser(name='Alice', email='alice@example.com')
 print(result)
 ```
 
-Если нужен пример с **SOAP-заголовками, авторизацией, сертификатами**, скажи — покажу «полный ужас».
+Да! Давай по-программистски, но с пользой.
 
 ---
+
+### 🧾 Что такое **WSDL**?
+
+**WSDL (Web Services Description Language)** — это **XML-файл**, который описывает интерфейс SOAP-сервиса:
+
+* какие **методы** доступны (`operations`)
+* какие у них **входные и выходные параметры**
+* какие **типы данных** используются
+* какие **endpoint'ы** (адреса) для вызовов
+
+Если сравнивать с REST, то WSDL — это как **OpenAPI/Swagger**, только в виде XML и сложнее.
+
+---
+
+### 💬 На сленге:
+
+> **WSDL — это формализованная бумажка для SOAP API, чтобы машина и человек могли вместе страдать.**
+
+---
+
+### 📦 Пример WSDL-файла (упрощённо):
+
+```xml
+<definitions name="UserService"
+             targetNamespace="http://example.com/user"
+             xmlns="http://schemas.xmlsoap.org/wsdl/"
+             xmlns:tns="http://example.com/user"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+  <message name="CreateUserRequest">
+    <part name="name" type="xsd:string"/>
+    <part name="email" type="xsd:string"/>
+  </message>
+
+  <message name="CreateUserResponse">
+    <part name="userId" type="xsd:int"/>
+  </message>
+
+  <portType name="UserPortType">
+    <operation name="CreateUser">
+      <input message="tns:CreateUserRequest"/>
+      <output message="tns:CreateUserResponse"/>
+    </operation>
+  </portType>
+
+  <binding name="UserBinding" type="tns:UserPortType">
+    <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="CreateUser">
+      <soap:operation soapAction="createUser"/>
+      <input><soap:body use="encoded" namespace="urn:user" encodingStyle="..."/></input>
+      <output><soap:body use="encoded" namespace="urn:user" encodingStyle="..."/></output>
+    </operation>
+  </binding>
+
+  <service name="UserService">
+    <port name="UserPort" binding="tns:UserBinding">
+      <soap:address location="http://example.com/soap/user"/>
+    </port>
+  </service>
+
+</definitions>
+```
+
+---
+
+### 🧠 Что важно знать разработчику:
+
+| Вещь                                                                  | Что это                           |
+| --------------------------------------------------------------------- | --------------------------------- |
+| `definitions`, `portType`, `binding`, `service`                       | Основные разделы, описывающие API |
+| `message`                                                             | Описание входа/выхода функций     |
+| `soap:address`                                                        | URL, куда слать SOAP-запрос       |
+| WSDL можно использовать с `zeep`, `SoapUI`, `Postman` (в режиме SOAP) |                                   |
+
+---
+
+### 📌 Как использовать:
+
+#### В Python (через [zeep](https://docs.python-zeep.org/)):
+
+```python
+from zeep import Client
+
+client = Client('https://example.com/service?wsdl')
+result = client.service.CreateUser(name="Alice", email="alice@example.com")
+```
+
+#### Или в SoapUI:
+
+1. Создаёшь проект.
+2. Вставляешь WSDL URL.
+3. SoapUI сам подгрузит все методы.
+
+---
+
+
+
+

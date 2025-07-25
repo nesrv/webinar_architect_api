@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+service TodoService {
+  rpc AddTask (TaskRequest) returns (TaskResponse);          // Унарный RPC
+  rpc GetTasks (GetTasksRequest) returns (stream TaskResponse); // Серверный поток
+}
+
+message TaskRequest {
+  string title = 1;
+  string description = 2;
+}
+
+message TaskResponse {
+  int32 id = 1;
+  string title = 2;
+  string description = 3;
+  bool completed = 4;
+}
+
+message GetTasksRequest {}

@@ -14,6 +14,7 @@
 
 ```bash
 pip install grpcio grpcio-tools
+python -m pip install  grpcio grpcio-tools
 ```
 
 ## Генерация кода из proto-файла
@@ -25,6 +26,7 @@ python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. weather.proto
 ```
 
 Это создаст два файла:
+
 - `weather_pb2.py` - содержит классы сообщений
 - `weather_pb2_grpc.py` - содержит классы клиента и сервера
 
@@ -81,6 +83,107 @@ python weather_client.py
 3. **Поддержка стриминга** - возможность передачи потоковых данных в реальном времени
 4. **Двунаправленная связь** - удобно для реализации чата и подписок на обновления
 5. **Высокая производительность** - оптимизированный протокол HTTP/2
+
+## Тестирование gRPC API в Postman
+
+### Настройка Postman для gRPC
+
+1. **Создайте новый gRPC запрос:**
+   - New → gRPC Request
+   - Server URL: `localhost:50051`
+
+2. **Импорт proto файла:**
+   - Import → Proto file
+   - Выберите файл `weather.proto`
+   - Или скопируйте содержимое в Proto definition
+
+### Примеры тестирования методов
+
+#### 1. GetCurrentWeather (Unary)
+- **Service:** `WeatherService`
+- **Method:** `GetCurrentWeather`
+- **Message:**
+```json
+{
+  "city": "Москва"
+}
+```
+
+#### 2. GetForecast (Unary)
+- **Service:** `WeatherService`
+- **Method:** `GetForecast`
+- **Message:**
+```json
+{
+  "city": "Санкт-Петербург",
+  "days": 5
+}
+```
+
+#### 3. SubscribeToWeatherUpdates (Server Streaming)
+- **Service:** `WeatherService`
+- **Method:** `SubscribeToWeatherUpdates`
+- **Message:**
+```json
+{
+  "city": "Екатеринбург"
+}
+```
+- Получите поток обновлений в реальном времени
+
+#### 4. SendWeatherData (Client Streaming)
+- **Service:** `WeatherService`
+- **Method:** `SendWeatherData`
+- **Messages:** (отправьте несколько сообщений)
+```json
+{
+  "station_id": "MSK001",
+  "temperature": 25.5,
+  "humidity": 60,
+  "pressure": 1013.25,
+  "wind_speed": 5.2
+}
+```
+```json
+{
+  "station_id": "MSK001",
+  "temperature": 26.0,
+  "humidity": 58,
+  "pressure": 1012.8,
+  "wind_speed": 4.8
+}
+```
+
+#### 5. ChatWithMeteorologist (Bidirectional Streaming)
+- **Service:** `WeatherService`
+- **Method:** `ChatWithMeteorologist`
+- **Messages:**
+```json
+{
+  "user": "client",
+  "message": "Привет! Какая погода ожидается завтра?"
+}
+```
+```json
+{
+  "user": "client",
+  "message": "Спасибо за информацию!"
+}
+```
+
+### Важные моменты для Postman:
+
+1. **Убедитесь, что сервер запущен** на `localhost:50051`
+2. **Proto файл должен быть корректно импортирован**
+3. **Для streaming методов** используйте кнопки Start/Stop streaming
+4. **Client streaming:** отправляйте несколько сообщений через "Send message"
+5. **Bidirectional streaming:** можете отправлять и получать сообщения одновременно
+
+### Альтернативные инструменты:
+
+- **grpcurl** - CLI инструмент для тестирования gRPC
+- **BloomRPC** - GUI клиент для gRPC
+- **Evans** - интерактивный gRPC клиент
 
 ## Возможные улучшения
 

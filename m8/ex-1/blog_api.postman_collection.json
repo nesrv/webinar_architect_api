@@ -1,0 +1,101 @@
+{
+  "info": {
+    "name": "Blog API",
+    "description": "REST API для управления постами и комментариями",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000"
+    }
+  ],
+  "item": [
+    {
+      "name": "Получить все посты",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/posts",
+          "host": ["{{base_url}}"],
+          "path": ["posts"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Response has posts array\", function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.be.an('array');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Создать пост",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": 2,\n  \"title\": \"Новый пост\",\n  \"content\": \"Содержимое поста\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/posts",
+          "host": ["{{base_url}}"],
+          "path": ["posts"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 201\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Получить комментарии к посту",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/posts/1/comments",
+          "host": ["{{base_url}}"],
+          "path": ["posts", "1", "comments"]
+        }
+      }
+    },
+    {
+      "name": "Удалить пост",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/posts/1",
+          "host": ["{{base_url}}"],
+          "path": ["posts", "1"]
+        }
+      }
+    }
+  ]
+}
