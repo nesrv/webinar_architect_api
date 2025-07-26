@@ -1,0 +1,65 @@
+{
+  "info": {
+    "name": "Telegram Bot Polling API",
+    "description": "Коллекция для тестирования Telegram бота с polling",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Информация",
+      "item": [
+        {
+          "name": "Информация о боте",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/bot_info"
+          }
+        },
+        {
+          "name": "Статус polling",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/status"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Сообщения",
+      "item": [
+        {
+          "name": "Отправить сообщение",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"chat_id\": 123456789,\n  \"text\": \"Привет из polling API!\"\n}"
+            },
+            "url": "{{base_url}}/send"
+          }
+        },
+        {
+          "name": "Получить сообщения",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/messages"
+          }
+        },
+        {
+          "name": "Очистить сообщения",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/messages"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000"
+    }
+  ]
+}

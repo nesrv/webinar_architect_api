@@ -1,0 +1,84 @@
+{
+  "info": {
+    "name": "Интернет-магазин SQLite API",
+    "description": "Коллекция для тестирования магазина с SQLite",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Товары",
+      "item": [
+        {
+          "name": "Получить все товары",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/products"
+          }
+        },
+        {
+          "name": "Получить товар по ID",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/products/1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Корзина",
+      "item": [
+        {
+          "name": "Добавить товар в корзину",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"product_id\": 1,\n  \"quantity\": 2\n}"
+            },
+            "url": "{{base_url}}/cart"
+          }
+        },
+        {
+          "name": "Просмотр корзины",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/cart"
+          }
+        },
+        {
+          "name": "Удалить из корзины",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/cart/1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Заказы",
+      "item": [
+        {
+          "name": "Создать заказ",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/order"
+          }
+        },
+        {
+          "name": "Получить заказы",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/orders"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8001"
+    }
+  ]
+}
