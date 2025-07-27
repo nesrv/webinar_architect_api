@@ -51,8 +51,248 @@ ping google.com
 
 ![alt text](image/osi-2.gif)
 
+### **Модель OSI для Python-разработчика: просто о сложном**  
+
+Модель OSI (Open Systems Interconnection) — это **7-уровневая абстракция**, объясняющая, как данные передаются по сети. Python-программисту она помогает понять, на каком уровне возникают ошибки (например, "Connection refused" или "SSL handshake failed") и как работают библиотеки типа `requests`, `socket` или `asyncio`.
+
+---
+
+## **1. Зачем Python-разработчику знать OSI?**  
+- **Дебаггинг сетевых проблем**: Понять, где обрывается соединение — на уровне DNS (уровень 7) или TCP (уровень 4).  
+- **Выбор инструментов**:  
+  - `requests` работает на **уровне 7 (HTTP)**,  
+  - `socket` — на **уровнях 3–4 (IP/TCP)**,  
+  - `scapy` — позволяет работать с **уровнями 2–3 (Ethernet/IP)**.  
+- **Оптимизация**: Например, замена HTTP/1.1 на HTTP/2 (уровень 7) или выбор между TCP и UDP (уровень 4).
+
+---
+
+## **2. Уровни OSI и их аналоги в Python**  
+
+| №  | Уровень OSI       | Пример из мира Python                          | Что важно?                                                                 |
+|----|-------------------|-----------------------------------------------|----------------------------------------------------------------------------|
+| 7  | **Приложений**    | `requests`, `aiohttp`, Flask/Django           | HTTP, REST API, WebSockets, JSON/XML.                                      |
+| 6  | **Представления** | `json`, `pickle`, `cryptography`              | Шифрование, сжатие, сериализация данных.                                   |
+| 5  | **Сеансовый**     | `websockets`, `ssh`-сессии                    | Поддержка длительных соединений (например, аутентификация).                |
+| 4  | **Транспортный**  | `socket`, `asyncio`, TCP/UDP                  | Порты, гарантия доставки (TCP) или скорость (UDP).                         |
+| 3  | **Сетевой**       | `scapy`, `ping3`, роутеры                     | IP-адреса, маршрутизация.                                                 |
+| 2  | **Канальный**     | Драйверы сетевых карок (`nfqueue`)            | MAC-адреса, Ethernet/Wi-Fi.                                               |
+| 1  | **Физический**    | Кабели, сигналы Wi-Fi                         | Биты, электрические/оптические сигналы.                                    |
+
+---
+
+## **3. Примеры кода для разных уровней**  
+
+### **Уровень 7 (HTTP) — `requests`**  
+```python
+import requests
+response = requests.get("https://api.github.com")  # HTTP-запрос (уровень 7)
+print(response.json())
+```
+
+### **Уровень 4 (TCP) — `socket`**  
+```python
+import socket
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # TCP (уровень 4)
+s.connect(("google.com", 80))
+s.send(b"GET / HTTP/1.1\r\nHost: google.com\r\n\r\n")
+print(s.recv(4096))
+```
+
+### **Уровень 3 (IP) — `scapy`**  
+```python
+from scapy.all import *
+packet = IP(dst="8.8.8.8")/ICMP()  # Пинг (уровень 3)
+response = sr1(packet, timeout=2)
+print(response)
+```
+
+---
+
+## **4. Типичные проблемы и на каких уровнях искать**  
+1. **"Connection refused"** → Уровень 4 (порт закрыт) или 7 (сервер отверг запрос).  
+2. **"SSL certificate failed"** → Уровень 6 (проблема с шифрованием).  
+3. **Медленная загрузка данных** → Уровень 4 (TCP-буфер) или 7 (HTTP/1.1 без сжатия).  
+4. **"DNS resolution failed"** → Уровень 7 (проблема с доменным именем).  
+
+---
+
+## **5. Как запомнить порядок уровней?**  
+Мнемоника: **"Все Программисты Спят, Только Сетевые Калеки Фиксируют"**  
+1. **В**изит (Приложений)  
+2. **П**ациента (Представления)  
+3. **С**танции (Сеансовый)  
+4. **Т**ребует (Транспортный)  
+5. **С**рочно (Сетевой)  
+6. **К**офе (Канальный)  
+7. **Ф**иксировать (Физический)  
+
+---
+
+## **Вывод**  
+Python-разработчику не нужно глубоко разбираться в уровнях 1–2 (если вы не пишете драйверы), но понимание **уровней 3–7** критично для:  
+- Отладки сетевых ошибок,  
+- Выбора правильных библиотек,  
+- Оптимизации скорости и безопасности.  
+
+**Совет**: Начните с `requests` (уровень 7) и `socket` (уровень 4) — этого хватит для 90% задач.
+
+
 
 ![alt text](image/protocols.gif)
+
+### **Сетевые протоколы для Python-разработчика**  
+Сетевые протоколы — это «правила общения» программ в сети. Python-разработчик сталкивается с ними ежедневно: от HTTP-запросов до низкоуровневых TCP-сокетов. Разберём ключевые протоколы и их применение в Python.
+
+---
+
+## **1. Основные протоколы и где они используются**  
+### **1.1. Прикладной уровень (уровень 7 OSI)**  
+#### **HTTP/HTTPS**  
+- **Для чего**: Веб-запросы, REST API, загрузка данных.  
+- **Python-библиотеки**: `requests`, `aiohttp`, `httpx`.  
+```python
+import requests
+response = requests.get("https://api.github.com")
+print(response.json())
+```
+
+#### **WebSocket**  
+- **Для чего**: Чат, онлайн-игры, реальное время (например, биржевые котировки).  
+- **Python-библиотеки**: `websockets`, `socket.io`.  
+```python
+import websockets
+async def chat():
+    async with websockets.connect("ws://echo.websocket.org") as ws:
+        await ws.send("Hello!")
+        print(await ws.recv())
+```
+
+#### **FTP/SFTP**  
+- **Для чего**: Передача файлов.  
+- **Python-библиотеки**: `ftplib`, `paramiko` (SFTP).  
+```python
+from ftplib import FTP
+ftp = FTP("ftp.example.com")
+ftp.login("user", "password")
+ftp.retrbinary("RETR file.txt", open("file.txt", "wb").write)
+```
+
+---
+
+### **1.2. Транспортный уровень (уровень 4 OSI)**  
+#### **TCP**  
+- **Для чего**: Надёжная передача данных (гарантирует доставку).  
+- **Python-библиотеки**: `socket`.  
+```python
+import socket
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # TCP
+s.connect(("google.com", 80))
+s.send(b"GET / HTTP/1.1\r\nHost: google.com\r\n\r\n")
+print(s.recv(4096).decode())
+```
+
+#### **UDP**  
+- **Для чего**: Быстрая, но ненадёжная передача (стриминг, VoIP).  
+- **Python-библиотеки**: `socket`, `asyncio`.  
+```python
+s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
+s.sendto(b"Hello!", ("8.8.8.8", 53))  # DNS-запрос
+```
+
+---
+
+### **1.3. Сетевой уровень (уровень 3 OSI)**  
+#### **IP (IPv4/IPv6)**  
+- **Для чего**: Маршрутизация пакетов в сети.  
+- **Python-библиотеки**: `socket`, `ipaddress`.  
+```python
+import ipaddress
+ip = ipaddress.IPv4Address("192.168.1.1")
+print(ip.is_private)  # True
+```
+
+#### **ICMP (ping)**  
+- **Для чего**: Проверка доступности хоста.  
+- **Python-библиотеки**: `ping3`, `scapy`.  
+```python
+from ping3 import ping
+print(ping("google.com"))  # Время ответа в ms
+```
+
+---
+
+## **2. Как выбрать протокол?**  
+| **Задача**               | **Протокол**  | **Python-инструменты**       |
+|---------------------------|---------------|------------------------------|
+| Веб-API                   | HTTP/HTTPS    | `requests`, `aiohttp`        |
+| Реальное время (чаты)     | WebSocket     | `websockets`                 |
+| Файлообмен                | FTP/SFTP      | `ftplib`, `paramiko`         |
+| Надёжная передача данных  | TCP           | `socket`                     |
+| Быстрая передача (стримы) | UDP           | `socket`, `asyncio`          |
+| Сканирование сети         | ICMP          | `ping3`, `scapy`             |
+
+---
+
+## **3. Типичные проблемы и решения**  
+### **3.1. "Connection refused"**  
+**Причина**: Порт закрыт или сервер не слушает.  
+**Решение**:  
+```python
+try:
+    s.connect(("example.com", 9999))
+except ConnectionRefusedError:
+    print("Сервер недоступен!")
+```
+
+### **3.2. Таймауты в HTTP-запросах**  
+**Решение**:  
+```python
+response = requests.get("https://example.com", timeout=5)  # 5 секунд
+```
+
+### **3.3. UDP-пакеты теряются**  
+**Причина**: UDP не гарантирует доставку.  
+**Решение**:  
+- Добавить подтверждения (ACK) на уровне приложения.  
+- Или перейти на TCP.  
+
+---
+
+## **4. Дополнительные протоколы**  
+- **DNS** (`dnspython`) — преобразование доменов в IP.  
+- **SMTP** (`smtplib`) — отправка email.  
+- **SSH** (`paramiko`) — безопасное удалённое управление.  
+- **gRPC** (`grpc`) — высокопроизводительный RPC (микросервисы).  
+
+```python
+import smtplib
+server = smtplib.SMTP("smtp.gmail.com", 587)
+server.starttls()
+server.login("your_email@gmail.com", "password")
+server.sendmail("from@example.com", "to@example.com", "Hello!")
+```
+
+---
+
+## **5. Что запомнить Python-разработчику?**  
+1. **HTTP/HTTPS** — основа веба, учите `requests` и `aiohttp`.  
+2. **TCP** — для надёжности, **UDP** — для скорости.  
+3. **WebSocket** — если нужно реальное время.  
+4. **Проблемы с сетью?** Смотрите:  
+   - `ping` (ICMP) → проверка доступности,  
+   - `telnet` (TCP) → проверка портов,  
+   - `traceroute` → диагностика маршрута.  
+
+**Совет**: Для сложных задач (парсинг пакетов, кастомные протоколы) используйте `scapy`.  
+
+```python
+from scapy.all import *
+packet = IP(dst="1.1.1.1")/ICMP()
+answer = sr1(packet, timeout=2)
+answer.show()  # Разбор ответа
+```
+
 
 ### **2.1 Как работает HTTP**
 
