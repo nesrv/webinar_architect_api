@@ -1,3 +1,4 @@
+https://eshift.ktalk.ru/hrllu6qk70et
 
 Петроченко Даниил Валерьевич	rdp.eshift.ru:13165	Administrator	GOAQPa$$w0rd
 

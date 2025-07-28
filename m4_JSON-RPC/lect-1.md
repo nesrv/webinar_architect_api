@@ -2,6 +2,8 @@
 
 # Модуль 4. Проектирование API - JSON-RPC. 
 
+![alt text](image.png)
+
 
 ### **API JSON-RPC: для чего нужен?**  
 
@@ -34,6 +36,9 @@
   "id": 1
 }
 ```
+
+![alt text](api-complete-info-1.gif)
+
 
 ### **1.2 Обмен данными между клиентом и сервером**  
 - **Веб-приложения** (Frontend ↔ Backend).  
