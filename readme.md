@@ -20,8 +20,8 @@
 
 ### **1. Основные инструменты разработки**
 
-- ** Python 3.10+** (последняя стабильная версия)
-- ** VS Code** / Cursor (с расширениями: Python, Docker, REST Client)
+- **Python 3.10+** (последняя стабильная версия)
+- **VS Code** / Cursor (с расширениями: Python, Docker, REST Client)
 - **Jupyter Notebook / JupyterLab** (для интерактивных примеров в модулях по БД и анализу)
 - **Docker + Docker Compose** (развертывание брокеров сообщений, БД и микросервисов)
 
